@@ -15,8 +15,10 @@ class CDArray
     T *m_pData;
     int m_Number;
     int m_Size;
+    CDArray& operator=(const CDArray& other);
+    CDArray(const CDArray& other);
 public:
-    CDArray() :   m_Number( 0 ), m_Size ( 1 )
+    CDArray() : m_Number( 0 ), m_Size ( 1 )
         {
         m_pData = (T*) malloc(sizeof(T));
         }
@@ -42,11 +44,13 @@ public:
         return m_Number;
         }
     //delete a number of elements from the end of array
+    //not realloc array
     //return new numbers
     int Delete( int number )
         {
-        assert(m_Number <= number);
-        m_Number -= (m_Number < number ? m_Number : number);
+        const int new_size = m_Number - number;
+        assert(new_size >= 0);
+        m_Number = (new_size >= 0 ? new_size : 0);
         return m_Number;
         }
     //set nth element value T
@@ -78,8 +82,8 @@ public:
         assert(i < m_Number);
         return *( m_pData + i );
         }
-    int Number()    { return m_Number; }
-    int Size()      { return m_Size;  }
-    T *Ptr()        { return m_pData; }
+    int Number()const   { return m_Number; }
+    int Size()  const   { return m_Size;  }
+    T *Ptr()            { return m_pData; }
 };
 #endif // CDARRAY_H
