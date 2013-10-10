@@ -1,5 +1,7 @@
 #ifndef CDARRAY_H
 #define CDARRAY_H
+#include <cassert>
+#include <cstdlib>
 /*
  * Заданее будет следующее:
  * реализовать недостающие функции нижеописанного класса (оставил кой какие функции
@@ -38,14 +40,16 @@ public:
         return m_Number;
         }
     //delete a number of elements from the end of array
+    //return new numbers
     int Delete( int number )
         {
         assert(m_Number <= number);
         m_Number -= (m_Number < number ? m_Number : number);
+        return m_Number;
         }
     //set nth element value T
     //on correctoperation return 0;
-    //if n is out of (0, size-1) return size of array
+    //if n is out of (0, number-1) return number of array
     int Modify( int n, const T &t )
         {
         if(n >= m_Number)
@@ -54,13 +58,17 @@ public:
         return 0;
         }
     //set new size to array (with reallocation)
-    //all data over new size will be lost
-    //set size and number to size;
-    int Resize( int size )
+    //all data over new_size will be lost
+    //return new size of array (or old size on error realloc)
+    int Resize( int new_size )
         {
-        m_Number = m_Size = size;
-        m_pData = (T*) realloc( m_pData, sizeof( T ) * m_Size * 2 );
-        assert(m_pData);
+        T * new_pData = (T*) realloc( m_pData, sizeof( T ) * new_size * 2 );
+        if(new_pData)
+            {
+            m_Number = m_Size = new_size;
+            m_pData = new_pData;
+            }
+        return m_Size;
         }
     void Clear()    { m_Number = 0; }
     T &operator[]( int i ) const
