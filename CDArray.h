@@ -16,11 +16,13 @@ class CDArray
     int m_Number;
     int m_Size;
 public:
-    CDArray() :  m_pData((T*) malloc(1)), m_Number( 0 ), m_Size ( 1 )
+    CDArray() :   m_Number( 0 ), m_Size ( 1 )
         {
+        m_pData = (T*) malloc(sizeof(T));
         }
-    CDArray( int size ) : m_pData((T*) malloc(size)), m_Number( 0 ), m_Size ( size )
+    CDArray( int size ) : m_Number( 0 ), m_Size ( size )
         {
+        m_pData = (T*) malloc(sizeof(T) * m_Size);
         }
     virtual ~CDArray()
         {
@@ -52,7 +54,7 @@ public:
     //if n is out of (0, number-1) return number of array
     int Modify( int n, const T &t )
         {
-        if(n >= m_Number)
+        if(n < m_Number)
             return m_Number;
         *( m_pData + n ) = t;
         return 0;
@@ -71,9 +73,9 @@ public:
         return m_Size;
         }
     void Clear()    { m_Number = 0; }
-    T &operator[]( int i ) const
+    const T &operator[]( int i ) const
         {
-        assert(m_Number <= i);
+        assert(i < m_Number);
         return *( m_pData + i );
         }
     int Number()    { return m_Number; }
