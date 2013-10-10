@@ -58,7 +58,7 @@ public:
     //if n is out of (0, number-1) return number of array
     int Modify( int n, const T &t )
         {
-        if(n < m_Number)
+        if(n >= m_Number)
             return m_Number;
         *( m_pData + n ) = t;
         return 0;
