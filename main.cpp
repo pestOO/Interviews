@@ -53,6 +53,8 @@ int main()
             cout << endl << "Modify error : ";
     cout << endl << "Modified array values : ";
     showCDArray(array);
+
+    cout << endl;
     return 0;
     }
 
