@@ -16,10 +16,10 @@ class CDArray
     int m_Number;
     int m_Size;
 public:
-    CDArray() : m_Number( 0 ), m_Size ( 1 ), m_pData(NULL)
+    CDArray() :  m_pData((T*) malloc(1)), m_Number( 0 ), m_Size ( 1 )
         {
         }
-    CDArray( int size ) : m_Number( 0 ), m_Size ( size ), m_pData(NULL)
+    CDArray( int size ) : m_pData((T*) malloc(size)), m_Number( 0 ), m_Size ( size )
         {
         }
     virtual ~CDArray()
