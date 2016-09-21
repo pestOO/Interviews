@@ -87,14 +87,14 @@ public:
    // Add char to the end of string
    void append(char ch)
    {
-      save_value(this);
+      save_curent_value();
       _str.push_back(ch);
       PRINT_VALUE(get_value());
    }
    // remove last char in the string
    void erase()
    {
-      save_value(this);
+      save_curent_value();
       if (_str.empty()) {
          return;
       }
@@ -109,7 +109,7 @@ public:
    // restore last changed element state
    static void UnDo()
    {
-       restore_value();
+       restore_last_global_value();
    }
 private:
    explicit CustomString(const std::string& str) : _str(str)
@@ -120,26 +120,31 @@ private:
    {
       RestorerType::clear_history(this);
    }
-   static void save_value(CustomString* cstr)
+   void save_curent_value()
    {
-      RestorerType::set_last_changed_string(cstr);
-      cstr->_states.push(cstr->_str);
+      RestorerType::set_last_changed_string(this);
+      _states.push(_str);
    }
-   static void restore_value()
+   // Restore last global change
+   static void restore_last_global_value()
    {
       CustomString* last = RestorerType::get_last_changed_string();
       if (last == nullptr) {
          return;
       }
-
-      if (last->_states.empty()) {
-         return;
-      }
-      last->_str = last->_states.top();
-      last->_states.pop();
-
+      last->restore_last_current_value();
       PRINT_VALUE(last->get_value());
    }
+   // Restore last current object change
+   void restore_last_current_value()
+   {
+       if (_states.empty()) {
+          return;
+       }
+       _str = _states.top();
+       _states.pop();
+   }
+
    std::string _str;
    std::stack<std::string> _states;
 };
