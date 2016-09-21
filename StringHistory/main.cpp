@@ -1,10 +1,13 @@
+#ifdef _MSC_VER
 #include "stdafx.h"
+#endif
 #include <string>
 #include <stack>
 #include <string>
 #include <memory>
 #include <mutex>
-
+#include <iostream>
+#include <algorithm>
 
 class CustomString {
 public:
@@ -86,11 +89,11 @@ private:
          pointer);
    }
 
-   mutable static std::mutex custom_strings_access_history_lock;
+   static std::mutex custom_strings_access_history_lock;
    static std::deque<CustomString*> custom_strings_access_history;
 };
-std::mutex CustomString::custom_strings_access_history_lock =
-   std::mutex();
+
+std::mutex CustomString::custom_strings_access_history_lock;
 std::deque<CustomString*> CustomString::custom_strings_access_history =
    std::deque<CustomString*>();
 
@@ -103,8 +106,6 @@ public:
    static std::shared_ptr<CustomString>
       CreateString(const std::string& str = std::string())
    {
-      new CustomString();
-
       return std::shared_ptr<CustomString>(
          new CustomString(str),
          [](CustomString*p) {
@@ -127,9 +128,9 @@ namespace {
    }
 }
 
-int _tmain(int argc, _TCHAR* argv[])
+int main(int argc, char* argv[])
 {
-   std::shared_ptr<CustomString> cstr = 
+   std::shared_ptr<CustomString> cstr =
       CustromStringProvider::CreateString("Start Value");
    print(cstr);
 
