@@ -19,7 +19,55 @@
 #define PRINT_VALUE(VALUE) (void) VALUE;
 #endif
 
+// Class provides a simple restoring by saving all values
+// Pro: fast implmentation, CPU performance
+// Cons: RAM consaption is maximum
+template<typename T>
+class FastRestorer {
+public:
+    static void set_last_changed_string(T* pointer)
+    {
+       std::lock_guard<std::mutex> lock(
+          history_lock);
+       access_history.push_back(pointer);
+    }
+    static T* get_last_changed_string()
+    {
+       std::lock_guard<std::mutex> lock(
+          history_lock);
+       if (access_history.empty()) {
+          return nullptr;
+       }
+       T* last = access_history.back();
+       access_history.pop_back();
+       return last;
+    }
+
+    static void clear_history(T* pointer)
+    {
+       std::lock_guard<std::mutex> lck(
+          history_lock);
+       std::remove(
+          access_history.begin(),
+          access_history.end(),
+          pointer);
+    }
+
+    static std::mutex history_lock;
+    static std::deque<T*> access_history;
+};
+template<typename T>
+std::mutex FastRestorer<T>::history_lock;
+template<typename T>
+std::deque<T*> FastRestorer<T>::access_history;
+
+
+// Class provides a simple interface for manipulating
+// * adding new char to the end of string
+// * remove last char of the string
+// * reject (UnDo) last change with any string of this type
 class CustomString {
+    typedef FastRestorer<CustomString> RestorerType;
 public:
    // Add char to the end of string
    void append(char ch)
@@ -38,15 +86,17 @@ public:
       _str.pop_back();
       PRINT_VALUE(get_value());
    }
+   // return current string value
    const std::string& get_value() const
    {
       return _str;
    }
-   // TODO(EZamkhov): Move logic to restore_value
-   // for redability restore_value<->save_value
+   // restore last changes element state
    static void UnDo()
    {
-      CustomString* last = get_last_changed_string();
+   // TODO(EZamkhov): Move logic to restore_value
+   // for redability restore_value<->save_value
+      CustomString* last = RestorerType::get_last_changed_string();
       if (last == nullptr) {
          return;
       }
@@ -60,13 +110,11 @@ private:
    }
    ~CustomString()
    {
-      clear_history(this);
+      RestorerType::clear_history(this);
    }
    void save_value()
    {
-      std::lock_guard<std::mutex> lck(
-         custom_strings_access_history_lock);
-      custom_strings_access_history.push_back(this);
+      RestorerType::set_last_changed_string(this);
       _states.push(_str);
    }
    void restore_value()
@@ -80,36 +128,8 @@ private:
    }
    std::string _str;
    std::stack<std::string> _states;
-
-   static CustomString* get_last_changed_string()
-   {
-      std::lock_guard<std::mutex> lck(
-         custom_strings_access_history_lock);
-      if (custom_strings_access_history.empty()) {
-         return nullptr;
-      }
-      CustomString* cstring = custom_strings_access_history.back();
-      custom_strings_access_history.pop_back();
-      return cstring;
-   }
-
-   static void clear_history(CustomString* pointer)
-   {
-      std::lock_guard<std::mutex> lck(
-         custom_strings_access_history_lock);
-      std::remove(
-         custom_strings_access_history.begin(),
-         custom_strings_access_history.end(),
-         pointer);
-   }
-
-   static std::mutex custom_strings_access_history_lock;
-   static std::deque<CustomString*> custom_strings_access_history;
 };
 
-std::mutex CustomString::custom_strings_access_history_lock;
-std::deque<CustomString*> CustomString::custom_strings_access_history =
-   std::deque<CustomString*>();
 
 
 // TODO-list(EZamakhov) :
