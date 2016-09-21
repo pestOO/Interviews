@@ -1,6 +1,9 @@
 #ifdef _MSC_VER
 #include "stdafx.h"
 #endif
+
+#define TEST_MODE 1
+
 #include <string>
 #include <stack>
 #include <string>
@@ -9,6 +12,13 @@
 #include <iostream>
 #include <algorithm>
 
+#ifdef TEST_MODE
+#define PRINT_VALUE(VALUE) \
+    std::cout << VALUE << std::endl;
+#else
+#define PRINT_VALUE(VALUE) (void) VALUE;
+#endif
+
 class CustomString {
 public:
    // Add char to the end of string
@@ -16,6 +26,7 @@ public:
    {
       save_value();
       _str.push_back(ch);
+      PRINT_VALUE(get_value());
    }
    // remove last char in the string
    void erase()
@@ -25,6 +36,7 @@ public:
          return;
       }
       _str.pop_back();
+      PRINT_VALUE(get_value());
    }
    const std::string& get_value() const
    {
@@ -44,6 +56,7 @@ private:
    friend class CustromStringProvider;
    explicit CustomString(const std::string& str) : _str(str)
    {
+       PRINT_VALUE(get_value());
    }
    ~CustomString()
    {
@@ -63,6 +76,7 @@ private:
       }
       _str = _states.top();
       _states.pop();
+      PRINT_VALUE(_str);
    }
    std::string _str;
    std::stack<std::string> _states;
@@ -121,27 +135,17 @@ public:
 };
 
 
-namespace {
-   void print(const std::shared_ptr<CustomString> cstr)
-   {
-      std::cout << cstr->get_value() << std::endl;
-   }
-}
 
 int main(int argc, char* argv[])
 {
    std::shared_ptr<CustomString> cstr =
       CustromStringProvider::CreateString("Start Value");
-   print(cstr);
 
    cstr->append('!');
-   print(cstr);
 
    cstr->append('?');
-   print(cstr);
 
    cstr->UnDo();
-   print(cstr);
 
    return 0;
 }
