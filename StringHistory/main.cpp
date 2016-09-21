@@ -1,6 +1,5 @@
 #include <string>
 #include <stack>
-#include <string>
 #include <memory>
 #include <mutex>
 #include <iostream>
@@ -43,10 +42,12 @@ public:
     {
        std::lock_guard<std::mutex> lck(
           history_lock);
-       std::remove(
-          access_history.begin(),
-          access_history.end(),
-          pointer);
+       access_history.erase(
+          std::remove(
+             access_history.begin(),
+             access_history.end(),
+             pointer),
+          access_history.end());
     }
 
     static std::mutex history_lock;
@@ -214,6 +215,21 @@ int main(int argc, char* argv[])
    TEST(cstr, "");
    cstr->UnDo();
    TEST(cstr, "");
+
+
+   // Test for cheching clear history
+   std::shared_ptr<CustomString> cstr1 = CustomString::Create("1");
+   std::shared_ptr<CustomString> cstr2 = CustomString::Create("2");
+   cstr1->append('A');
+   TEST(cstr1, "1A");
+   cstr2->append('B');
+   TEST(cstr2, "2B");
+
+   // Remove last changed
+   cstr2.reset();
+   cstr1->UnDo();
+   TEST(cstr1, "1");
+
 
    return 0;
 }
