@@ -66,9 +66,24 @@ std::deque<T*> FastRestorer<T>::access_history;
 // * adding new char to the end of string
 // * remove last char of the string
 // * reject (UnDo) last change with any string of this type
+// TODO(EZamakhov) : add template for string types
+// TODO(EZamakhov) : add logging error states
 class CustomString {
     typedef FastRestorer<CustomString> RestorerType;
 public:
+    // Fabric method
+    // Provides own deletion method for correct deletion in shared objects
+    static std::shared_ptr<CustomString>
+       Create(const std::string& str = std::string())
+    {
+       return std::shared_ptr<CustomString>(
+          new CustomString(str),
+          [](CustomString*p) {
+            delete p;
+            },
+          std::allocator<CustomString>());
+    }
+
    // Add char to the end of string
    void append(char ch)
    {
@@ -103,7 +118,6 @@ public:
       last->restore_value();
    }
 private:
-   friend class CustromStringProvider;
    explicit CustomString(const std::string& str) : _str(str)
    {
        PRINT_VALUE(get_value());
@@ -130,30 +144,6 @@ private:
    std::stack<std::string> _states;
 };
 
-
-
-// TODO-list(EZamakhov) :
-// * add template for string types
-// * add logging error states
-class CustromStringProvider {
-public:
-   static std::shared_ptr<CustomString>
-      CreateString(const std::string& str = std::string())
-   {
-      return std::shared_ptr<CustomString>(
-         new CustomString(str),
-         [](CustomString*p) {
-         DeleteString(p);
-      },
-         std::allocator<CustomString>());
-   }
-   static void DeleteString(CustomString* p)
-   {
-      delete p;
-      p = nullptr;
-   };
-};
-
 void TEST(std::shared_ptr<CustomString> cstr, const std::string& expected) {
     const std::string& actual = cstr->get_value();
     if(actual != expected) {
@@ -172,7 +162,7 @@ void TEST(std::shared_ptr<CustomString> cstr, const std::string& expected) {
 int main(int argc, char* argv[])
 {
    std::shared_ptr<CustomString> cstr =
-      CustromStringProvider::CreateString("Start Value");
+      CustomString::Create("Start Value");
    // Test initalization
    TEST(cstr, "Start Value");
 
@@ -200,7 +190,7 @@ int main(int argc, char* argv[])
    TEST(cstr, "Start Value");
 
    cstr.reset();
-   cstr = CustromStringProvider::CreateString();
+   cstr = CustomString::Create();
 
    // Test adding chars
    cstr->append('1');
