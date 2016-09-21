@@ -134,18 +134,75 @@ public:
    };
 };
 
+void TEST(std::shared_ptr<CustomString> cstr, const std::string& expected) {
+    const std::string& actual = cstr->get_value();
+    if(actual != expected) {
+        std::cout << "TEST FAILED!" << std::endl
+                  << "Expected: \"" << expected << '"' << std::endl
+                  << "Actual:   \"" << actual << '"' << std::endl;
+    }
+    else
+    {
+        std::cout << "TEST OK!" << std::endl;
+    }
+}
+
 
 
 int main(int argc, char* argv[])
 {
    std::shared_ptr<CustomString> cstr =
       CustromStringProvider::CreateString("Start Value");
+   // Test initalization
+   TEST(cstr, "Start Value");
 
+   // Test adding char
    cstr->append('!');
+   TEST(cstr, "Start Value!");
 
-   cstr->append('?');
+   //test removing char
+   cstr->erase();
+   TEST(cstr, "Start Value");
 
+   // Test restore removing char
    cstr->UnDo();
+   TEST(cstr, "Start Value!");
+
+   // test restore adding char
+   cstr->UnDo();
+   TEST(cstr, "Start Value");
+
+   // test restore in case of no states
+   cstr->UnDo();
+   TEST(cstr, "Start Value");
+   // twice
+   cstr->UnDo();
+   TEST(cstr, "Start Value");
+
+   cstr.reset();
+   cstr = CustromStringProvider::CreateString();
+
+   // Test adding chars
+   cstr->append('1');
+   TEST(cstr, "1");
+   cstr->append('2');
+   TEST(cstr, "12");
+   cstr->append('3');
+   TEST(cstr, "123");
+   cstr->append('4');
+   TEST(cstr, "1234");
+
+   // test restore adding char
+   cstr->UnDo();
+   TEST(cstr, "123");
+   cstr->UnDo();
+   TEST(cstr, "12");
+   cstr->UnDo();
+   TEST(cstr, "1");
+   cstr->UnDo();
+   TEST(cstr, "");
+   cstr->UnDo();
+   TEST(cstr, "");
 
    return 0;
 }
