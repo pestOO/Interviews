@@ -87,14 +87,14 @@ public:
    // Add char to the end of string
    void append(char ch)
    {
-      save_value();
+      save_value(this);
       _str.push_back(ch);
       PRINT_VALUE(get_value());
    }
    // remove last char in the string
    void erase()
    {
-      save_value();
+      save_value(this);
       if (_str.empty()) {
          return;
       }
@@ -106,16 +106,10 @@ public:
    {
       return _str;
    }
-   // restore last changes element state
+   // restore last changed element state
    static void UnDo()
    {
-   // TODO(EZamkhov): Move logic to restore_value
-   // for redability restore_value<->save_value
-      CustomString* last = RestorerType::get_last_changed_string();
-      if (last == nullptr) {
-         return;
-      }
-      last->restore_value();
+       restore_value();
    }
 private:
    explicit CustomString(const std::string& str) : _str(str)
@@ -126,19 +120,25 @@ private:
    {
       RestorerType::clear_history(this);
    }
-   void save_value()
+   static void save_value(CustomString* cstr)
    {
-      RestorerType::set_last_changed_string(this);
-      _states.push(_str);
+      RestorerType::set_last_changed_string(cstr);
+      cstr->_states.push(cstr->_str);
    }
-   void restore_value()
+   static void restore_value()
    {
-      if (_states.empty()) {
+      CustomString* last = RestorerType::get_last_changed_string();
+      if (last == nullptr) {
          return;
       }
-      _str = _states.top();
-      _states.pop();
-      PRINT_VALUE(_str);
+
+      if (last->_states.empty()) {
+         return;
+      }
+      last->_str = last->_states.top();
+      last->_states.pop();
+
+      PRINT_VALUE(last->get_value());
    }
    std::string _str;
    std::stack<std::string> _states;
