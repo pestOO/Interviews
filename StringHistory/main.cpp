@@ -1,9 +1,3 @@
-#ifdef _MSC_VER
-#include "stdafx.h"
-#endif
-
-#define TEST_MODE 1
-
 #include <string>
 #include <stack>
 #include <string>
@@ -11,6 +5,8 @@
 #include <mutex>
 #include <iostream>
 #include <algorithm>
+
+#define TEST_MODE 1
 
 #ifdef TEST_MODE
 #define PRINT_VALUE(VALUE) \
