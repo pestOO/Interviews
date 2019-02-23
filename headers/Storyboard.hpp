@@ -33,9 +33,10 @@ public:
   //! Adding note to the board
   void addNote(const Note& aNote);
 
-  //! Delete note from the board
-  //! \Note TNoteSearchResult coudl be not valide after this deletion
-  void deleteNote(TNoteFunctor&& aFunctor);
+  //! Delete exact note from the board
+  //! \Note Note is not valide after insertion
+  // TODO(EZ): return shared ptr to avoid UB
+  void deleteNote(const Note& aNote);
 
   TNoteSearchResult searchByTitle(const Note::TTitle& aTitle);
   TNoteSearchResult searchByText(const Note::TText& aText);
@@ -44,8 +45,9 @@ public:
 private:
   TNoteContainer iNotes;
 
+  // Use hash not string value to save memory
   using TSearchHash = std::size_t;
-  using TNoteIndexer = std::unordered_map<TSearchHash, THashNote>;
+  using TNoteIndexer = std::unordered_multimap<TSearchHash, THashNote>;
   TNoteIndexer iTextIndexer;
   TNoteIndexer iTagsIndexer;
 };
@@ -53,10 +55,14 @@ private:
 
 void Storyboard::addNote(const Note &aNote)
 {
-  iNotes.insert({aNote.getTitle(), aNote});
+  const auto& title = aNote.getTitle();
+  iNotes.insert({title, aNote});
+
+  const auto textHash = std::hash<Note::TText>()(aNote.getText());
+  iTextIndexer.insert({textHash, title});
 }
 
-void Storyboard::deleteNote(Storyboard::TNoteFunctor &&aFunctor)
+void Storyboard::deleteNote(const Note& aNote)
 {
 
 //  const it = std::remove(std::begin(iNotes), std::end(iNotes), aFunctor);
@@ -74,7 +80,7 @@ Storyboard::TNoteSearchResult Storyboard::searchByTitle(const Note::TTitle &aTit
   Storyboard::TNoteSearchResult result;
   result.reserve(std::distance(range.first, range.second));
 
-  for (auto it = range.first; it!=range.second; ++it) {
+  for (auto it = range.first; it != range.second; ++it) {
       auto ref = std::ref(it->second);
       result.push_back(ref);
     }
@@ -83,7 +89,19 @@ Storyboard::TNoteSearchResult Storyboard::searchByTitle(const Note::TTitle &aTit
 
 Storyboard::TNoteSearchResult Storyboard::searchByText(const Note::TText &aText)
 {
-  return {};
+  const auto hash = std::hash<Note::TText>()(aText);
+
+  auto range = iTextIndexer.equal_range(hash);
+
+  Storyboard::TNoteSearchResult result;
+
+  for (auto it = range.first; it != range.second; ++it) {
+      const auto title = it->second;
+      auto partResult = searchByTitle(title);
+      result.insert(result.end(), std::make_move_iterator(partResult.begin()),
+                    std::make_move_iterator(partResult.end()));
+    }
+  return result;
 }
 
 Storyboard::TNoteSearchResult Storyboard::searchByTag(const Note::TTagContainer &aTags)
