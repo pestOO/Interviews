@@ -9,11 +9,11 @@ void TestStoryBoardEmptySearch()
   note.setTags({"1", "2"});
 
   Storyboard board;
-  assert(boost::size(board.searchByText("text")) == 0);
-  assert(boost::size(board.searchByText("")) == 0);
-  assert(boost::size(board.searchByTitle("Title")) == 0);
-  assert(boost::size(board.searchByTitle(""))== 0);
-  assert(boost::size(board.searchByTag({})) == 0);
+  assert(board.searchByText("text").size() == 0);
+  assert(board.searchByText("").size() == 0);
+  assert(board.searchByTitle("Title").size() == 0);
+  assert(board.searchByTitle("").size() == 0);
+  assert(board.searchByTag({}).size() == 0);
 }
 
 void TestStoryBoardConstruction()
@@ -34,4 +34,9 @@ void TestStoryBoard()
 {
   TestStoryBoardEmptySearch();
   std::cout << __FUNCTION__ << " finished" << std::endl;
+}
+
+int main()
+{
+    TestStoryBoard();
 }

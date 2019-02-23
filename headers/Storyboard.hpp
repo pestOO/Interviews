@@ -11,38 +11,85 @@
  *       reasons for your decision. 
  */
 
+#pragma once
+#ifndef HEADERS_STORYBOARD_HPP
+#define HEADERS_STORYBOARD_HPP
 #include <Note.hpp>
 
-#include <boost/range/adaptor/filtered.hpp>
-#include <boost/range/iterator_range.hpp>
-
 #include <list>
-#include <map>
+#include <unordered_map>
 #include <memory>
+#include <vector>
 
 class Storyboard
 {
 public:
-  using TNoteContainer = std::list<Note>;
-  using TNotesRange =  boost::iterator_range<TNoteContainer::iterator>;
+  using THashNote = Note::TTitle;
+  //TOD(EZ): change from map to set - to save key memoery
+  using TNoteContainer = std::unordered_multimap<THashNote, Note>;
+  using TNoteSearchResult = std::vector< std::reference_wrapper<Note> >;
   using TNoteFunctor = std::function<bool(const Note&)>;
-  using TNoteFilteredRange = boost::filtered_range<TNoteFunctor, const TNotesRange>;
 
+  //! Adding note to the board
   void addNote(const Note& aNote);
 
+  //! Delete note from the board
+  //! \Note TNoteSearchResult coudl be not valide after this deletion
   void deleteNote(TNoteFunctor&& aFunctor);
 
-  TNoteFilteredRange searchByTitle(const Note::TTitle& aTitle);
-  TNoteFilteredRange searchByText(const Note::TText& aText);
-  TNoteFilteredRange searchByTag(const Note::TTagContainer& aTags);
+  TNoteSearchResult searchByTitle(const Note::TTitle& aTitle);
+  TNoteSearchResult searchByText(const Note::TText& aText);
+  TNoteSearchResult searchByTag(const Note::TTagContainer& aTags);
 	
 private:
   TNoteContainer iNotes;
 
-  using TNoteIndexer = std::map<std::size_t, std::reference_wrapper<Note>>;
-  TNoteIndexer iTitleIndexer;
+  using TSearchHash = std::size_t;
+  using TNoteIndexer = std::unordered_map<TSearchHash, THashNote>;
   TNoteIndexer iTextIndexer;
   TNoteIndexer iTagsIndexer;
 };
 
 
+void Storyboard::addNote(const Note &aNote)
+{
+  iNotes.insert({aNote.getTitle(), aNote});
+}
+
+void Storyboard::deleteNote(Storyboard::TNoteFunctor &&aFunctor)
+{
+
+//  const it = std::remove(std::begin(iNotes), std::end(iNotes), aFunctor);
+//  for( ; it!= std::end(iNotes); ++it)
+//    {
+
+//    }
+//  iNotes.erase()
+}
+
+Storyboard::TNoteSearchResult Storyboard::searchByTitle(const Note::TTitle &aTitle)
+{
+  auto range = iNotes.equal_range(aTitle);
+
+  Storyboard::TNoteSearchResult result;
+  result.reserve(std::distance(range.first, range.second));
+
+  for (auto it = range.first; it!=range.second; ++it) {
+      auto ref = std::ref(it->second);
+      result.push_back(ref);
+    }
+  return result;
+}
+
+Storyboard::TNoteSearchResult Storyboard::searchByText(const Note::TText &aText)
+{
+  return {};
+}
+
+Storyboard::TNoteSearchResult Storyboard::searchByTag(const Note::TTagContainer &aTags)
+{
+
+  return {};
+}
+
+#endif  // HEADERS_STORYBOARD_HPP
