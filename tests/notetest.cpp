@@ -27,3 +27,9 @@ void TestNote()
     TestNoteSetGet();
     std::cout << __FUNCTION__ << " finished" << std::endl;
 }
+
+
+int main()
+{
+    TestNote();
+}
