@@ -18,13 +18,14 @@
 class Note
 {
 public:
-    /*! Define ouw types to simplify futher performance improvement
+  /*! Define ouw types to simplify futher performance improvement
      * TODO(EZamakhov): compare performance with cusom allocators,
      *                  when non-functional requirments are avalible
      */
     using TTitle = std::string;
     using TText  = std::string;
     using TTag   = std::string;
+    // There is no sence to have several tags, so we can merge them by std::set
     using TTagContainer = std::set<TTag>;
 
     const TTitle& getTitle() const;
@@ -42,37 +43,42 @@ private:
     TTagContainer iTags;
 };
 
-
-// TODO(EZamakhov):move to source file
+// TODO(EZamakhov): move to cpp file
+// Implementation
 
 const Note::TTitle &Note::getTitle() const
 {
-return iTitle;
+  return iTitle;
 }
 
 void Note::setTitle(const TTitle &value)
 {
-iTitle = value;
+  //TODO(EZ): add limitations
+  iTitle = value;
 }
 
 const Note::TText &Note::getText() const
 {
-return iText;
+  //TODO(EZ): add limitations
+  return iText;
 }
 
 void Note::setText(const TText &value)
 {
-iText = value;
+  //TODO(EZ): add limitations
+  iText = value;
 }
 
 const Note::TTagContainer &Note::getTags() const
 {
-return iTags;
+  return iTags;
 }
 
 void Note::setTags(const TTagContainer &value)
 {
-iTags = value;
+  //TODO(EZ): add limitations
+  iTags = value;
 }
+
 
 #endif  // HEADERS_NOTE_HPP
