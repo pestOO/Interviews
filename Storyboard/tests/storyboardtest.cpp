@@ -168,7 +168,7 @@ void TestStoryBoardSearchByTextAfterRemoval()
   assert(board.searchByTitle("text").size() == 0);
 }
 
-void TestStoryBoardSearchByAfterRemovalOneAnother()
+void TestStoryBoardSearchByTitleAfterRemovalOneAnother()
 {
   Note note;
   note.setTitle("Title");
@@ -183,13 +183,13 @@ void TestStoryBoardSearchByAfterRemovalOneAnother()
   note.setTags({"3", "4"});
   board.addNote(note);
 
-  auto foudnByText = board.searchByTitle("text");
+  auto foudnByText = board.searchByTitle("Title");
   assert(foudnByText.size() == 1);
 
   board.deleteNote(foudnByText[0].get());
 
-  assert(board.searchByTitle("Text").size() == 0);
-  assert(board.searchByTitle("Text2").size() == 1);
+  assert(board.searchByTitle("Title").size() == 0);
+  assert(board.searchByTitle("Title2").size() == 1);
 }
 
 //TODO(EZ):add test for seral equal in the board
@@ -205,7 +205,7 @@ void TestStoryBoard()
   TestStoryBoardSearchByTagOne();
   TestStoryBoardSearchByTagTwo();
   TestStoryBoardSearchByTextAfterRemoval();
-  TestStoryBoardSearchByAfterRemovalOneAnother();
+  TestStoryBoardSearchByTitleAfterRemovalOneAnother();
 
   std::cout << __FUNCTION__ << " finished" << std::endl;
 }

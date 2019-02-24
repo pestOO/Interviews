@@ -47,8 +47,8 @@ private:
   TNoteContainer iNotes;
 
   // Use hash not string value to save memory
-  using TSearchHash = std::size_t;
-  using TNoteIndexer = std::unordered_multimap<TSearchHash, THashNote>;
+  using THashIndexer = std::size_t;
+  using TNoteIndexer = std::unordered_multimap<THashIndexer, THashNote>;
   TNoteIndexer iTextIndexer;
   TNoteIndexer iTagsIndexer;
 };
@@ -68,12 +68,41 @@ void Storyboard::addNote(const Note &aNote) {
 
 void Storyboard::deleteNote(const Note &aNote) {
 
-  assert(false && "Not implmented");
+  const auto title = aNote.getTitle();
+
+  auto range = iNotes.equal_range(title);
+
+  Storyboard::TNoteSearchResult result;
+  result.reserve(std::distance(range.first, range.second));
+
+  for (auto it = range.first; it != range.second;) {
+    auto foundNote = it->second;
+    const auto &foundText = foundNote.getText();
+    const auto &foundTags = foundNote.getTags();
+    // double check we remove expected note
+    if (foundText == aNote.getText() && foundTags == aNote.getTags()) {
+      // TODO(EZ):check behaviuot with 2 with the same titles, text, but not
+      // tags
+      const auto taxtHash = std::hash<Note::TText>()(foundText);
+      iTextIndexer.erase(taxtHash);
+
+      // TODO(EZ):fix erasing tags for other notes
+      for (const auto &tag : iTagsIndexer) {
+        const auto tagHash = std::hash<Note::TTag>()(tag.second);
+        iTextIndexer.erase(tagHash);
+      }
+      auto removalIt = it;
+      ++it;
+      iNotes.erase(removalIt);
+    } else {
+      ++it;
+    }
+  }
 }
 
 Storyboard::TNoteSearchResult
 Storyboard::searchByTitle(const Note::TTitle &aTitle) {
-  auto range = iNotes.equal_range(aTitle);
+  const auto range = iNotes.equal_range(aTitle);
 
   Storyboard::TNoteSearchResult result;
   result.reserve(std::distance(range.first, range.second));
