@@ -38,9 +38,10 @@ public:
   // TODO(EZ): return shared ptr to avoid UB
   void deleteNote(const Note &aNote);
 
+  // TOD(EZ): add proper doxygen for each searh
   TNoteSearchResult searchByTitle(const Note::TTitle &aTitle);
   TNoteSearchResult searchByText(const Note::TText &aText);
-  TNoteSearchResult searchByTag(const Note::TTagContainer &aTags);
+  TNoteSearchResult searchByTag(const Note::TTag &aTag);
 
 private:
   TNoteContainer iNotes;
@@ -58,6 +59,11 @@ void Storyboard::addNote(const Note &aNote) {
 
   const auto textHash = std::hash<Note::TText>()(aNote.getText());
   iTextIndexer.insert({textHash, title});
+
+  for (const auto &tag : aNote.getTags()) {
+    const auto tagHash = std::hash<Note::TTag>()(tag);
+    iTagsIndexer.insert({tagHash, title});
+  }
 }
 
 void Storyboard::deleteNote(const Note &aNote) {
@@ -82,9 +88,9 @@ Storyboard::searchByTitle(const Note::TTitle &aTitle) {
 Storyboard::TNoteSearchResult
 Storyboard::searchByText(const Note::TText &aText) {
 
-  const auto hash = std::hash<Note::TText>()(aText);
+  const auto textHash = std::hash<Note::TText>()(aText);
 
-  auto range = iTextIndexer.equal_range(hash);
+  auto range = iTextIndexer.equal_range(textHash);
 
   Storyboard::TNoteSearchResult result;
 
@@ -97,10 +103,21 @@ Storyboard::searchByText(const Note::TText &aText) {
   return result;
 }
 
-Storyboard::TNoteSearchResult
-Storyboard::searchByTag(const Note::TTagContainer &aTags) {
+Storyboard::TNoteSearchResult Storyboard::searchByTag(const Note::TTag &aTag) {
 
-  return {};
+  const auto tagHash = std::hash<Note::TText>()(aTag);
+
+  auto range = iTagsIndexer.equal_range(tagHash);
+
+  Storyboard::TNoteSearchResult result;
+
+  for (auto it = range.first; it != range.second; ++it) {
+    const auto title = it->second;
+    auto partResult = searchByTitle(title);
+    result.insert(result.end(), std::make_move_iterator(partResult.begin()),
+                  std::make_move_iterator(partResult.end()));
+  }
+  return result;
 }
 
 #endif // HEADERS_STORYBOARD_HPP

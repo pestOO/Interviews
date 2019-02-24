@@ -112,9 +112,41 @@ void TestStoryBoardSearchByTextDouble()
   assert(foundByText[1].get().getTags() == Note::TTagContainer({"3", "4"}));
 }
 
-void TestStoryBoardSearchByTag()
+void TestStoryBoardSearchByTagOne()
 {
-  //TBD
+  Note note;
+  note.setTitle("Title");
+  note.setTags({"1"});
+
+  Storyboard board;
+  board.addNote(note);
+
+  note.setTitle("Title2");
+  note.setTags({"3"});
+  board.addNote(note);
+
+  auto foundByText = board.searchByTag("1");
+  assert(foundByText.size() == 1);
+  assert(foundByText[0].get().getTitle() == "Title");
+}
+
+void TestStoryBoardSearchByTagTwo()
+{
+  Note note;
+  note.setTitle("Title");
+  note.setTags({"1", "2"});
+
+  Storyboard board;
+  board.addNote(note);
+
+  note.setTitle("Title2");
+  note.setTags({"1", "3"});
+  board.addNote(note);
+
+  auto foundByText = board.searchByTag("1");
+  assert(foundByText.size() == 2);
+  assert(foundByText[0].get().getTitle() == "Title");
+  assert(foundByText[1].get().getTitle() == "Title2");
 }
 
 
@@ -170,7 +202,8 @@ void TestStoryBoard()
   TestStoryBoardSearchByWrongText();
   TestStoryBoardSearchByText();
   TestStoryBoardSearchByTextDouble();
-  TestStoryBoardSearchByTag();
+  TestStoryBoardSearchByTagOne();
+  TestStoryBoardSearchByTagTwo();
   TestStoryBoardSearchByTextAfterRemoval();
   TestStoryBoardSearchByAfterRemovalOneAnother();
 
