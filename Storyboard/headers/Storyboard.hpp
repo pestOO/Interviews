@@ -3,12 +3,13 @@
  * E.g.:
  *      searchByTitle("Test Traceplayer")
  *      searchByTag({"testing", "unit test"})
- *   	searchByText("Implement a unit test for the class Traceplayer of the spark core framework.")
- * For the sake of simplicity we don't want to do any similiarity or prefix matching when
- * searching for a title, tag or text. Only an exact match should give results.
- * 
- * Hint: Think about performance versus memory tradeoffs in your design, so you can give good 
- *       reasons for your decision. 
+ *   	searchByText("Implement a unit test for the class Traceplayer of the
+ * spark core framework.") For the sake of simplicity we don't want to do any
+ * similiarity or prefix matching when searching for a title, tag or text. Only
+ * an exact match should give results.
+ *
+ * Hint: Think about performance versus memory tradeoffs in your design, so you
+ * can give good reasons for your decision.
  */
 
 #pragma once
@@ -17,31 +18,30 @@
 #include <Note.hpp>
 
 #include <list>
-#include <unordered_map>
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
-class Storyboard
-{
+class Storyboard {
 public:
   using THashNote = Note::TTitle;
-  //TOD(EZ): change from map to set - to save key memoery
+  // TODO(EZ): change from map to set - to save memory
   using TNoteContainer = std::unordered_multimap<THashNote, Note>;
-  using TNoteSearchResult = std::vector< std::reference_wrapper<Note> >;
-  using TNoteFunctor = std::function<bool(const Note&)>;
+  using TNoteSearchResult = std::vector<std::reference_wrapper<Note>>;
+  using TNoteFunctor = std::function<bool(const Note &)>;
 
   //! Adding note to the board
-  void addNote(const Note& aNote);
+  void addNote(const Note &aNote);
 
   //! Delete exact note from the board
   //! \Note Note is not valide after insertion
   // TODO(EZ): return shared ptr to avoid UB
-  void deleteNote(const Note& aNote);
+  void deleteNote(const Note &aNote);
 
-  TNoteSearchResult searchByTitle(const Note::TTitle& aTitle);
-  TNoteSearchResult searchByText(const Note::TText& aText);
-  TNoteSearchResult searchByTag(const Note::TTagContainer& aTags);
-	
+  TNoteSearchResult searchByTitle(const Note::TTitle &aTitle);
+  TNoteSearchResult searchByText(const Note::TText &aText);
+  TNoteSearchResult searchByTag(const Note::TTagContainer &aTags);
+
 private:
   TNoteContainer iNotes;
 
@@ -52,43 +52,36 @@ private:
   TNoteIndexer iTagsIndexer;
 };
 
-
-void Storyboard::addNote(const Note &aNote)
-{
-  const auto& title = aNote.getTitle();
+void Storyboard::addNote(const Note &aNote) {
+  const auto &title = aNote.getTitle();
   iNotes.insert({title, aNote});
 
   const auto textHash = std::hash<Note::TText>()(aNote.getText());
   iTextIndexer.insert({textHash, title});
 }
 
-void Storyboard::deleteNote(const Note& aNote)
-{
+void Storyboard::deleteNote(const Note &aNote) {
 
-//  const it = std::remove(std::begin(iNotes), std::end(iNotes), aFunctor);
-//  for( ; it!= std::end(iNotes); ++it)
-//    {
-
-//    }
-//  iNotes.erase()
+  assert(false && "Not implmented");
 }
 
-Storyboard::TNoteSearchResult Storyboard::searchByTitle(const Note::TTitle &aTitle)
-{
+Storyboard::TNoteSearchResult
+Storyboard::searchByTitle(const Note::TTitle &aTitle) {
   auto range = iNotes.equal_range(aTitle);
 
   Storyboard::TNoteSearchResult result;
   result.reserve(std::distance(range.first, range.second));
 
   for (auto it = range.first; it != range.second; ++it) {
-      auto ref = std::ref(it->second);
-      result.push_back(ref);
-    }
+    auto ref = std::ref(it->second);
+    result.push_back(ref);
+  }
   return result;
 }
 
-Storyboard::TNoteSearchResult Storyboard::searchByText(const Note::TText &aText)
-{
+Storyboard::TNoteSearchResult
+Storyboard::searchByText(const Note::TText &aText) {
+
   const auto hash = std::hash<Note::TText>()(aText);
 
   auto range = iTextIndexer.equal_range(hash);
@@ -96,18 +89,18 @@ Storyboard::TNoteSearchResult Storyboard::searchByText(const Note::TText &aText)
   Storyboard::TNoteSearchResult result;
 
   for (auto it = range.first; it != range.second; ++it) {
-      const auto title = it->second;
-      auto partResult = searchByTitle(title);
-      result.insert(result.end(), std::make_move_iterator(partResult.begin()),
-                    std::make_move_iterator(partResult.end()));
-    }
+    const auto title = it->second;
+    auto partResult = searchByTitle(title);
+    result.insert(result.end(), std::make_move_iterator(partResult.begin()),
+                  std::make_move_iterator(partResult.end()));
+  }
   return result;
 }
 
-Storyboard::TNoteSearchResult Storyboard::searchByTag(const Note::TTagContainer &aTags)
-{
+Storyboard::TNoteSearchResult
+Storyboard::searchByTag(const Note::TTagContainer &aTags) {
 
   return {};
 }
 
-#endif  // HEADERS_STORYBOARD_HPP
+#endif // HEADERS_STORYBOARD_HPP

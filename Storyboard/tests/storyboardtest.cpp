@@ -87,13 +87,8 @@ void TestStoryBoardSearchByText()
   assert(foundByText[0].get().getTags() == Note::TTagContainer({"1", "2"}));
 }
 
-void TestStoryBoardSearchByTag()
-{
-  //TBD
-}
 
-
-void TestStoryBoardSearchByAfterRemoval()
+void TestStoryBoardSearchByTextDouble()
 {
   Note note;
   note.setTitle("Title");
@@ -103,13 +98,42 @@ void TestStoryBoardSearchByAfterRemoval()
   Storyboard board;
   board.addNote(note);
 
-  auto foudnByText = board.searchByTitle("Text");
+  note.setTitle("Title2");
+  note.setText("text");
+  note.setTags({"3", "4"});
+  board.addNote(note);
+
+  auto foundByText = board.searchByText("text");
+  assert(foundByText.size() == 2);
+  assert(foundByText[0].get().getTitle() == "Title");
+  assert(foundByText[1].get().getTitle() == "Title2");
+
+  assert(foundByText[0].get().getTags() == Note::TTagContainer({"1", "2"}));
+  assert(foundByText[1].get().getTags() == Note::TTagContainer({"3", "4"}));
+}
+
+void TestStoryBoardSearchByTag()
+{
+  //TBD
+}
+
+
+void TestStoryBoardSearchByTextAfterRemoval()
+{
+  Note note;
+  note.setTitle("Title");
+  note.setText("text");
+  note.setTags({"1", "2"});
+
+  Storyboard board;
+  board.addNote(note);
+
+  auto foudnByText = board.searchByText("text");
   assert(foudnByText.size() == 1);
 
   board.deleteNote(foudnByText[0].get());
 
-  assert(board.searchByTitle("Text").size() == 0);
-  assert(board.searchByTitle("Text2").size() == 1);
+  assert(board.searchByTitle("text").size() == 0);
 }
 
 void TestStoryBoardSearchByAfterRemovalOneAnother()
@@ -127,7 +151,7 @@ void TestStoryBoardSearchByAfterRemovalOneAnother()
   note.setTags({"3", "4"});
   board.addNote(note);
 
-  auto foudnByText = board.searchByTitle("Text");
+  auto foudnByText = board.searchByTitle("text");
   assert(foudnByText.size() == 1);
 
   board.deleteNote(foudnByText[0].get());
@@ -136,7 +160,7 @@ void TestStoryBoardSearchByAfterRemovalOneAnother()
   assert(board.searchByTitle("Text2").size() == 1);
 }
 
-//TODO(EZ):add test with the hash collition
+//TODO(EZ):add test for seral equal in the board
 
 void TestStoryBoard()
 {
@@ -145,8 +169,9 @@ void TestStoryBoard()
   TestStoryBoardSearchByTitle();
   TestStoryBoardSearchByWrongText();
   TestStoryBoardSearchByText();
+  TestStoryBoardSearchByTextDouble();
   TestStoryBoardSearchByTag();
-  TestStoryBoardSearchByAfterRemoval();
+  TestStoryBoardSearchByTextAfterRemoval();
   TestStoryBoardSearchByAfterRemovalOneAnother();
 
   std::cout << __FUNCTION__ << " finished" << std::endl;
