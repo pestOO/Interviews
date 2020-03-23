@@ -3,11 +3,12 @@ Source code of applciationes written as a part of techical interview for differe
 
 ***
 
-- **CDArray_project** - template container CDArray and test examples, С/С++.
+- **SignatureGenerator** - multi-CPU optimized version of file hashing with lockfree MessaQequue and memory mapped files (Boost InterProcess LockFree program_options tests filesystem iostreams CRC).
 - **CountingWords** - GUI program for concurrent counting words in big file, show interactive top-10 found words, C++/Qt5.
-- **Yandex** - apps and text answers for online interview.
+- **CDArray_project** - template container CDArray and test examples, С/С++.
 - **StringHistory** - String wrapper for restoring last state any changed string
 - **Storyboard** - non-thread safety associative containers for specific needs
+- **Yandex** - apps and text answers for online interview.
 
 <p>ZamahovElisey@gmail.com</p>
 https://www.linkedin.com/in/eliseyzamakhov/
