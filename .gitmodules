@@ -1,0 +1,3 @@
+[submodule "SignatureGenerator"]
+	path = SignatureGenerator
+	url = https://github.com/pestOO/SignatureGenerator.git
