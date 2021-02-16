@@ -10,5 +10,5 @@ Source code of applications written as a part of technical interviews for differ
 - **Storyboard** - non-thread safety associative containers for specific needs
 - **Yandex** - apps and text answers for online interview.
 
-<p>ZamahovElisey@gmail.com</p>
+<p>eliseyzamakhov.jobs@gmail.com</p>
 https://www.linkedin.com/in/eliseyzamakhov/
